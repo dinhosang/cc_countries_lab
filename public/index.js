@@ -68,16 +68,24 @@ const requestComplete = function(){
   const jsonString = this.responseText
   const countries = JSON.parse(jsonString)
 
-  populateDropdown(countries)
+  // populateDropdown(countries)
+  populateRegionDropDown(countries)
 }
 
+const populateRegionDropDown = function(countries){
+  const dropdown = document.getElementById('region')
 
-const populateDropdown = function(countries){
-  const dropdown = document.getElementById('country-dropdown')
+  const regions = []
 
   countries.forEach(function(country){
+    if(!regions.includes(country.region) && country.region !== ""){
+      regions.push(country.region)
+    }
+  })
+
+  regions.forEach(function(region){
     const option = document.createElement('option')
-    option.innerText = country.name
+    option.innerText = region
     dropdown.appendChild(option)
   })
 
@@ -90,6 +98,42 @@ const populateDropdown = function(countries){
 
     populatePage(countryArray)
   }
+
+  dropdown.addEventListener('change', populateSubRegion.bind(dropdown, countries, regions))
+}
+
+const populateSubRegion = function(countries, regions) {
+  const dropdown = document.getElementById('sub_region')
+  const regionName = this.value
+  const subRegions = []
+
+  countries.forEach(function(country){
+    if(country.region === regionName && !subRegions.includes(country.subregion)){
+      subRegions.push(country.subregion)
+    }
+  })
+
+  subRegions.forEach(function(subRegion){
+    const option = document.createElement('option')
+    option.innerText = subRegion
+    dropdown.appendChild(option)
+  })
+
+  dropdown.addEventListener('change', populateCountryDropdown.bind(dropdown, countries))
+}
+
+const populateCountryDropdown = function(countries, subRegions){
+  const dropdown = document.getElementById('country-dropdown')
+  dropdown.innerHTML = '<option value="" id="default">Please select a country</option>'
+  const subRegionName = this.value
+
+  countries.forEach(function(country){
+    if(country.subregion === subRegionName){
+      const option = document.createElement('option')
+      option.innerText = country.name
+      dropdown.appendChild(option)
+    }
+  })
 
   dropdown.addEventListener('change', findCountry.bind(dropdown, countries))
 }
